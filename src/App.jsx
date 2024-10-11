@@ -2,8 +2,8 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Navi from "./Components/Navi.jsx";
 import Items from "./Components/Items.jsx";
-import Start from "./components/Start";
 import "./App.css";
+import Start from "./Components/Start.jsx";
 
 function App() {
   return (
