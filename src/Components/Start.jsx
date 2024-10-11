@@ -1,23 +1,33 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Spinner, Box, Text, Button, Center } from "@chakra-ui/react";
+import { Spinner, Text, Center } from "@chakra-ui/react";
+import Items from "./Items";
+import Navi from "./Navi";
 
 const Start = () => {
-  const [longitude, setLongitude] = useState("");
-  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState(null);
+  const [latitude, setLatitude] = useState(null);
   const [isAvailable, setAvailable] = useState(false);
-  const [position, setPosition] = useState({ latitude: null, longitude: null });
+  const [position, setPosition] = useState({
+    latitude: undefined,
+    longitude: undefined,
+  });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true); // Spinner for fetching geolocation
-  const [finalLoading, setFinalLoading] = useState(false); // Spinner after fetching geolocation
+  const [mode, setMode] = useState("ItemSearch"); // Spinner after fetching geolocation
 
   const search = useLocation().search;
   const query = new URLSearchParams(search);
 
   // Parse URL query parameters and set them to state
   useEffect(() => {
-    setLongitude(query.get("long"));
-    setLatitude(query.get("lat"));
+    const long = query.get("long");
+    const lat = query.get("lat");
+
+    if (long && lat) {
+      setLongitude(parseFloat(long));
+      setLatitude(parseFloat(lat));
+    }
   }, [search]);
 
   // Auto-fetch geolocation when the component mounts
@@ -28,19 +38,19 @@ const Start = () => {
         (position) => {
           const { latitude, longitude } = position.coords;
           setPosition({ latitude, longitude });
+          setLatitude(latitude); // Update latitude
+          setLongitude(longitude); // Update longitude
           setLoading(false);
-          setFinalLoading(true);
-
-          // Simulate a brief spinner after fetching the location
-          setTimeout(() => setFinalLoading(false), 2000);
         },
         (error) => {
-          setErrorMessage(`Error fetching position: ${error.message}`);
+          setErrorMessage(`位置情報の取得に失敗しました。: ${error.message}`);
           setLoading(false);
         }
       );
     } else {
-      setErrorMessage("Geolocation is not available in this browser.");
+      setErrorMessage(
+        "位置情報を取得できませんでした。許可設定をしたか再度確認してください。"
+      );
       setLoading(false);
     }
   }, []);
@@ -55,45 +65,17 @@ const Start = () => {
     );
   }
 
-  // Render second spinner briefly after geolocation is fetched
-  if (finalLoading) {
-    return (
-      <Center height="100vh">
-        <Spinner size="xl" color="green.500" />
-        <Text ml={4}>必要なものを考えています...</Text>
-      </Center>
-    );
+  // Render content based on mode after geolocation is fetched
+  if (mode === "ItemSearch") {
+    return <Items lat={latitude} long={longitude} />;
   }
-  ï;
-  return (
-    <>
-      <Box textAlign="center" mt={8}>
-        {errorMessage ? (
-          <Text color="red.500">{errorMessage}</Text>
-        ) : (
-          <>
-            <Text>Your longitude from URL: {longitude}</Text>
-            <Text>Your latitude from URL: {latitude}</Text>
-            <Box mt={4}>
-              <Text>
-                Latitude:{" "}
-                {position.latitude ? position.latitude : "Not available"}
-              </Text>
-              <Text>
-                Longitude:{" "}
-                {position.longitude ? position.longitude : "Not available"}
-              </Text>
-            </Box>
-          </>
-        )}
-      </Box>
-      <Center mt={8}>
-        <Button onClick={() => window.location.reload()}>
-          Reload Position
-        </Button>
-      </Center>
-    </>
-  );
+
+  if (mode === "Navi") {
+    return <Navi />;
+  }
+
+  // Optional: Handle fallback in case of invalid mode
+  return <Text>Unknown mode: {mode}</Text>;
 };
 
 export default Start;
