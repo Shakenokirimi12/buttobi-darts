@@ -64,7 +64,7 @@ const Start = () => {
       </Center>
     );
   }
-ï
+  ï;
   return (
     <>
       <Box textAlign="center" mt={8}>
@@ -92,7 +92,7 @@ const Start = () => {
           Reload Position
         </Button>
       </Center>
-    </>ï
+    </>
   );
 };
 
