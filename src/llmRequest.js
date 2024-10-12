@@ -1,14 +1,12 @@
-const postToGenerativeModel = async ({
-  user_prompt,
-}: {
-  user_prompt: string;
-}) => {
+const postToGenerativeModel = async ({ user_prompt }) => {
   const system_prompt = `
-      以下の指示に従って、リストを作成してください。
-      ユーザーからは緯度と経度が与えられます。その位置から半径50kmの範囲内で、観光地やそれに類するものを考えてください。
-      そして、その場所で楽しむのに必要なものをリストアップしてください。
-      なお、目的地の名前や目的地それ自体の情報は含めず、リストだけを返してください。
-      リストは・で始めてください。`;
+    以下の指示に従って、リストを作成してください。
+    ユーザーからは緯度と経度が与えられます。その位置から半径50kmの範囲内で、観光地やそれに類するものを考えてください。
+    そして、その場所で楽しむのに必要なものだけをリストアップしてください。
+    特に、海や山など、特有の場所で使用するものが好ましいです。また、逆に旅行には必須で、書くまでもないものは書かないでください。
+    例えば、水着、替えの服、などが好ましく、逆に、靴、スマートフォンなどは書かないでください。
+    なお、回答にはリストだけを返してください。
+    リストは・で始めてください。`;
 
   try {
     const resultText = await fetchApiResponse(user_prompt, system_prompt);
@@ -20,10 +18,7 @@ const postToGenerativeModel = async ({
   }
 };
 
-async function fetchApiResponse(
-  questionText: string,
-  systemInstruction: string
-) {
+async function fetchApiResponse(questionText, systemInstruction) {
   const apiKey = import.meta.env.VITE_API_KEY;
 
   if (!apiKey) {
@@ -33,23 +28,11 @@ async function fetchApiResponse(
   return await getGeminiFlashResponse(apiKey, questionText, systemInstruction);
 }
 
-async function getGeminiFlashResponse(
-  apiKey: string,
-  questionText: string,
-  systemInstruction: string
-) {
+async function getGeminiFlashResponse(apiKey, questionText, systemInstruction) {
   const model_name = "gemini-1.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model_name}:generateContent?key=${apiKey}`;
 
   const payload = {
-    systemInstruction: {
-      role: "system",
-      parts: [
-        {
-          text: systemInstruction,
-        },
-      ],
-    },
     contents: [
       {
         role: "user",
@@ -60,6 +43,14 @@ async function getGeminiFlashResponse(
         ],
       },
     ],
+    systemInstruction: {
+      role: "system",
+      parts: [
+        {
+          text: systemInstruction,
+        },
+      ],
+    },
     generationConfig: {
       temperature: 1,
       topK: 64,
